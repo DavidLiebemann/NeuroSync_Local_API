@@ -1,0 +1,26 @@
+# Ignoriere die virtuelle Umgebung
+.venv/
+
+# Ignoriere Cache-Dateien von Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignoriere Log- und Debug-Dateien
+logs/
+*.log
+
+# Ignoriere große Audio- oder Model-Dateien (optional)
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.mp4
+*.avi
+*.mov
+*.ogg
+*.webm
+
+# ignore models
+*.pth
