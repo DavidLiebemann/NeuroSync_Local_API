@@ -6,7 +6,7 @@
 
 import numpy as np
 import torch
-from torch.cuda.amp import autocast
+from torch.amp import autocast
 
 def decode_audio_chunk(audio_chunk, model, device, config):
     # Use precision based on config
@@ -21,7 +21,7 @@ def decode_audio_chunk(audio_chunk, model, device, config):
     with torch.no_grad():
         if use_half_precision:
 
-            with autocast(dtype=torch.float16):
+            with autocast(device_type=device.type, dtype=torch.float16):
                 encoder_outputs = model.encoder(src_tensor)
                 output_sequence = model.decoder(encoder_outputs)
         else:
