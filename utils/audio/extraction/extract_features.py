@@ -6,12 +6,18 @@
 import io
 import librosa
 import numpy as np
+import scipy.signal
+
 
 def extract_audio_features(audio_input, sr=88200, from_bytes=False):
-    if from_bytes:
-        y, sr = load_audio_from_bytes(audio_input, sr)
-    else:
-        y, sr = load_and_preprocess_audio(audio_input, sr)
+    try:
+        if from_bytes:
+            y, sr = load_audio_from_bytes(audio_input, sr)
+        else:
+            y, sr = load_and_preprocess_audio(audio_input, sr)
+    except Exception as e:
+            print(f"Loading as WAV failed: {e}\nFalling back to PCM loading.")
+            y, sr = load_pcm_audio_from_bytes(audio_input, sr)  
     
     frame_length = int(0.01667 * sr)  # Frame length set to 0.01667 seconds (~60 fps)
     hop_length = frame_length // 2  # 2x overlap for smoother transitions
@@ -196,5 +202,47 @@ def load_audio_file_from_memory(audio_bytes, sr=88200):
     max_val = np.max(np.abs(y))
     if max_val > 0:
         y = y / max_val
+
+    return y, sr
+
+
+
+
+def load_pcm_audio_from_bytes(audio_bytes, sr=22050, channels=1, sample_width=2):
+    """
+    Load raw PCM bytes into a normalized numpy array and upsample to 88200 Hz.
+    Assumes little-endian, 16-bit PCM data.
+    """
+    # Determine the appropriate numpy dtype.
+    if sample_width == 2:
+        dtype = np.int16
+        max_val = 32768.0
+    else:
+        raise ValueError("Unsupported sample width")
+    
+    # Convert bytes to numpy array.
+    data = np.frombuffer(audio_bytes, dtype=dtype)
+    
+    # If stereo or more channels, reshape accordingly.
+    if channels > 1:
+        data = data.reshape(-1, channels)
+    
+    # Normalize the data to range [-1, 1]
+    y = data.astype(np.float32) / max_val
+    
+    # Upsample the audio from the current sample rate to 88200 Hz.
+    target_sr = 88200
+    if sr != target_sr:
+        # Calculate the number of samples in the resampled signal.
+        num_samples = int(len(y) * target_sr / sr)
+        if channels > 1:
+            # Resample each channel separately.
+            y_resampled = np.zeros((num_samples, channels), dtype=np.float32)
+            for ch in range(channels):
+                y_resampled[:, ch] = scipy.signal.resample(y[:, ch], num_samples)
+        else:
+            y_resampled = scipy.signal.resample(y, num_samples)
+        y = y_resampled
+        sr = target_sr
 
     return y, sr
