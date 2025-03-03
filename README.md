@@ -45,6 +45,11 @@ The **NeuroSync Local API** allows you to host the audio-to-face blendshape tran
 
 1. Ensure uv package manager is installed or [install according to installation guide](https://docs.astral.sh/uv/getting-started/installation/)
 2. `uv sync` to install dependencies
+3. Setup the NeuroSync Model by following [the NeuroSync Model instructions](#NeuroSync-Model)
+   
+### Starting the Server
+
+- Use `uv run neurosync_local_api.py` to start a server at `http://127.0.0.1:5000`
 
 ### Features:
 - Host the model locally for full control
