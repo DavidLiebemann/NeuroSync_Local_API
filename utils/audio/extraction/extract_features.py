@@ -17,7 +17,7 @@ def extract_audio_features(audio_input, sr=88200, from_bytes=False):
             y, sr = load_and_preprocess_audio(audio_input, sr)
     except Exception as e:
             print(f"Loading as WAV failed: {e}\nFalling back to PCM loading.")
-            y, sr = load_pcm_audio_from_bytes(audio_input, sr)  
+            y = load_pcm_audio_from_bytes(audio_input)  
     
     frame_length = int(0.01667 * sr)  # Frame length set to 0.01667 seconds (~60 fps)
     hop_length = frame_length // 2  # 2x overlap for smoother transitions
@@ -33,7 +33,7 @@ def extract_audio_features(audio_input, sr=88200, from_bytes=False):
     
     return combined_features, y
 
-def extract_and_combine_features(y, sr, frame_length, hop_length, apply_smoothing=False, include_autocorr=True):
+def extract_and_combine_features(y, sr, frame_length, hop_length, include_autocorr=True):
    
     all_features = []
     mfcc_features = extract_mfcc_features(y, sr, frame_length, hop_length)
@@ -46,9 +46,6 @@ def extract_and_combine_features(y, sr, frame_length, hop_length, apply_smoothin
         all_features.append(autocorr_features)
     
     combined_features = np.hstack(all_features)
-
-    if apply_smoothing:
-        combined_features = smooth_features(combined_features)
 
     return combined_features
 
@@ -245,4 +242,4 @@ def load_pcm_audio_from_bytes(audio_bytes, sr=22050, channels=1, sample_width=2)
         y = y_resampled
         sr = target_sr
 
-    return y, sr
+    return y

@@ -42,3 +42,8 @@ profile.json
 
 # models
 *.pth
+
+# ------------ CUSTOM -------------
+/generated
+/wav_input
+!/wav_input/audio.wav
